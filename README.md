@@ -6,7 +6,7 @@ Internal static site deployment portal for GaadiyaHub platform.
 - Upload a zip file via browser UI
 - Automatically syncs to correct S3 bucket
 - Invalidates CloudFront cache
-- Supports two targets — main website and admin panel
+- Supports two targets- main website and admin panel
 
 ## Tech stack
 - Python Flask + Gunicorn
