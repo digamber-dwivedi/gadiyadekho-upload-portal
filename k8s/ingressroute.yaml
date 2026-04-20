@@ -1,0 +1,67 @@
+# ── SSL Certificate ────────────────────────────────────────────────────────────
+# cert-manager automatically provisions and renews this certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: upload-portal-tls
+  namespace: tools
+spec:
+  dnsNames:
+    - upload.gadiyadekhe.com
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: upload-portal-tls
+
+---
+# ── Traefik IngressRoute ───────────────────────────────────────────────────────
+# Routes upload.gadiyadekhe.com → upload-portal-svc
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: upload-portal-ingressroute
+  namespace: tools
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`upload.gadiyadekhe.com`)
+      services:
+        - name: upload-portal-svc
+          port: 80
+  tls:
+    secretName: upload-portal-tls
+
+---
+# ── HTTP → HTTPS redirect ──────────────────────────────────────────────────────
+# Anyone hitting http:// gets redirected to https://
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: upload-portal-ingressroute-http
+  namespace: tools
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`upload.gadiyadekhe.com`)
+      middlewares:
+        - name: redirect-to-https
+          namespace: tools
+      services:
+        - name: upload-portal-svc
+          port: 80
+
+---
+# ── Redirect middleware ────────────────────────────────────────────────────────
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-https
+  namespace: tools
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

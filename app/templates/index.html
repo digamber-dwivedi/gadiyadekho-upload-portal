@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GaadiyaHub — Deploy Portal</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .header-badge {
+      background: rgba(99,102,241,0.15);
+      color: #818cf8;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(99,102,241,0.2);
+      font-weight: 500;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .user-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #2d3148;
+      color: #64748b;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    /* ── Main layout ── */
+    .container {
+      max-width: 860px;
+      margin: 48px auto;
+      padding: 0 24px;
+      flex: 1;
+      width: 100%;
+    }
+
+    .page-title {
+      margin-bottom: 32px;
+    }
+
+    .page-title h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
+    }
+
+    .page-title p {
+      color: #64748b;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 2px;
+    }
+
+    /* ── Site selector ── */
+    .site-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .site-option {
+      position: relative;
+    }
+
+    .site-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+    }
+
+    .site-option label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      background: #0f1117;
+      border: 2px solid #2d3148;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .site-option input:checked + label {
+      border-color: #6366f1;
+      background: rgba(99,102,241,0.05);
+    }
+
+    .site-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .site-icon.main  { background: rgba(99,102,241,0.15); }
+    .site-icon.admin { background: rgba(139,92,246,0.15); }
+
+    .site-info strong {
+      display: block;
+      font-size: 14px;
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+
+    .site-info span {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed #2d3148;
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: #6366f1;
+      background: rgba(99,102,241,0.04);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon { font-size: 40px; margin-bottom: 12px; }
+
+    .drop-zone h3 {
+      font-size: 16px;
+      color: #f1f5f9;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .drop-zone p { font-size: 13px; color: #64748b; }
+
+    .file-selected {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #a5b4fc;
+    }
+
+    .btn-remove {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+      margin-left: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-remove:hover { opacity: 0.7; }
+
+    /* ── Progress ── */
+    .progress-wrap {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .progress-bar-bg {
+      background: #0f1117;
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* ── Deploy button ── */
+    .btn-deploy {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-deploy:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-deploy:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Status log ── */
+    .status-log {
+      display: none;
+      background: #0a0c12;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      min-height: 80px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log-line {
+      padding: 3px 0;
+      display: flex;
+      gap: 10px;
+    }
+
+    .log-time    { color: #334155; }
+    .log-info    { color: #64748b; }
+    .log-success { color: #22c55e; }
+    .log-error   { color: #ef4444; }
+    .log-working { color: #f59e0b; }
+
+    /* ── Result banner ── */
+    .result-banner {
+      display: none;
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .result-banner.success {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.2);
+      color: #86efac;
+    }
+
+    .result-banner.error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: #fca5a5;
+    }
+
+    /* ── Footer ── */
+    /* ── Footer ── */
+    .footer {
+      background: #1a1d27;
+      border-top: 1px solid #2d3148;
+      padding: 20px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: auto;
+    }
+
+    .footer span {
+      color: #6366f1;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo">🚗</div>
+      <h1>Deploy Portal</h1>
+      <span class="header-badge">Internal</span>
+    </div>
+    <div class="header-right">
+      <div class="user-pill">
+        <span class="user-dot"></span>
+        {{ session.username }}
+      </div>
+      <a href="/logout"><button class="btn-logout">Logout</button></a>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="container">
+    <div class="page-title">
+      <h2>Deploy Static Site 🚀</h2>
+      <p>Upload a zip file to deploy to S3 and invalidate CloudFront cache automatically.</p>
+    </div>
+
+    <!-- Step 1 — Select site -->
+    <div class="card">
+      <div class="card-title">Step 1 — Select Target Site</div>
+      <div class="site-selector">
+        {% for key, site in buckets.items() %}
+        <div class="site-option">
+          <input
+            type="radio"
+            name="target"
+            id="site-{{ key }}"
+            value="{{ key }}"
+            {% if loop.first %}checked{% endif %}
+          />
+          <label for="site-{{ key }}">
+            <div class="site-icon {{ key }}">
+              {{ '🌐' if key == 'main' else '⚙️' }}
+            </div>
+            <div class="site-info">
+              <strong>{{ site.label.split('(')[0].strip() }}</strong>
+              <span>{{ site.label.split('(')[1].replace(')', '') if '(' in site.label else '' }}</span>
+            </div>
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Step 2 — Upload -->
+    <div class="card">
+      <div class="card-title">Step 2 — Upload Build Zip</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".zip" />
+        <div class="drop-icon">📦</div>
+        <h3>Drop your zip file here</h3>
+        <p>or click to browse · only .zip files accepted</p>
+      </div>
+
+      <div class="file-selected" id="fileSelected">
+        <span>📄</span>
+        <span id="fileName"></span>
+        <span id="fileSize" style="color:#475569; margin-left:auto;"></span>
+        <button class="btn-remove" onclick="clearFile()" title="Remove file">✕</button>
+      </div>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">Uploading...</div>
+      </div>
+
+      <button class="btn-deploy" id="deployBtn" disabled onclick="deploy()">
+        <span>🚀</span> Deploy to Production
+      </button>
+
+      <div class="status-log" id="statusLog"></div>
+      <div class="result-banner" id="resultBanner"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Developed by <span>Digamber Dwivedi</span> on behalf of
+    <span>GaadiyaHub</span> &copy; 2026 &nbsp;·&nbsp; Internal Use Only
+  </footer>
+
+  <script>
+    const fileInput   = document.getElementById('fileInput');
+    const dropZone    = document.getElementById('dropZone');
+    const deployBtn   = document.getElementById('deployBtn');
+    const fileSelected = document.getElementById('fileSelected');
+    const fileName    = document.getElementById('fileName');
+    const fileSize    = document.getElementById('fileSize');
+    const fill        = document.getElementById('progressFill');
+    const plabel      = document.getElementById('progressLabel');
+    const progressWrap = document.getElementById('progressWrap');
+    const log         = document.getElementById('statusLog');
+    let progressInterval;
+
+    // ── File selection ──────────────────────────────────────────────────────
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const f = e.dataTransfer.files[0];
+      if (f) handleFile(f);
+    });
+
+    // Clear file when switching target site
+    document.querySelectorAll('input[name="target"]').forEach(radio => {
+      radio.addEventListener('change', clearFile);
+    });
+
+    function handleFile(f) {
+      if (!f.name.endsWith('.zip')) {
+        alert('Only .zip files are accepted.');
+        return;
+      }
+      fileName.textContent = f.name;
+      fileSize.textContent = (f.size / 1024 / 1024).toFixed(2) + ' MB';
+      fileSelected.style.display = 'flex';
+      deployBtn.disabled = false;
+    }
+
+    function clearFile() {
+      fileInput.value = '';
+      fileSelected.style.display = 'none';
+      fileName.textContent = '';
+      fileSize.textContent = '';
+      deployBtn.disabled = true;
+      progressWrap.style.display = 'none';
+      fill.style.width = '0%';
+      plabel.textContent = 'Uploading...';
+      document.getElementById('resultBanner').style.display = 'none';
+      log.style.display = 'none';
+      log.innerHTML = '';
+      clearInterval(progressInterval);
+    }
+
+    // ── Logging ─────────────────────────────────────────────────────────────
+    function addLog(msg, type = 'info') {
+      log.style.display = 'block';
+      const now = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = `<span class="log-time">[${now}]</span><span class="log-${type}">${msg}</span>`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // ── Progress ────────────────────────────────────────────────────────────
+    function startProgress() {
+      progressWrap.style.display = 'block';
+      let pct = 0;
+      progressInterval = setInterval(() => {
+        pct = Math.min(pct + Math.random() * 8, 90);
+        fill.style.width = pct + '%';
+        plabel.textContent = `Uploading... ${Math.round(pct)}%`;
+      }, 300);
+    }
+
+    function finishProgress(success) {
+      clearInterval(progressInterval);
+      fill.style.width = '100%';
+      plabel.textContent = success ? 'Done ✓' : 'Failed ✗';
+    }
+
+    // ── Deploy ───────────────────────────────────────────────────────────────
+    function deploy() {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const target = document.querySelector('input[name="target"]:checked').value;
+      const banner = document.getElementById('resultBanner');
+
+      // Reset UI
+      log.innerHTML = '';
+      log.style.display = 'none';
+      banner.style.display = 'none';
+      deployBtn.disabled = true;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('target', target);
+
+      addLog(`Starting deployment to ${target} site...`, 'working');
+      addLog(`File: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`, 'info');
+      startProgress();
+
+      fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      .then(r => r.json())
+      .then(data => {
+        finishProgress(data.success);
+        if (data.success) {
+          addLog('Files uploaded to S3 ✓', 'success');
+          addLog('CloudFront cache invalidated ✓', 'success');
+          addLog(data.message, 'success');
+          banner.className = 'result-banner success';
+          banner.innerHTML = '✅ ' + data.message;
+          banner.style.display = 'flex';
+          // Clear file 60 seconds after success
+          setTimeout(clearFile, 60000);
+        } else {
+          addLog('Deployment failed: ' + data.message, 'error');
+          banner.className = 'result-banner error';
+          banner.innerHTML = '❌ ' + data.message;
+          banner.style.display = 'flex';
+          deployBtn.disabled = false;
+        }
+      })
+      .catch(err => {
+        finishProgress(false);
+        addLog('Network error: ' + err.message, 'error');
+        banner.className = 'result-banner error';
+        banner.innerHTML = '❌ Network error. Please try again.';
+        banner.style.display = 'flex';
+        deployBtn.disabled = false;
+      });
+    }
+  </script>
+</body>
+</html>

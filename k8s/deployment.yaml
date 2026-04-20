@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upload-portal
+  namespace: tools
+  labels:
+    app: upload-portal
+    version: "1.0.0"
+    managed-by: digamber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: upload-portal
+  template:
+    metadata:
+      labels:
+        app: upload-portal
+    spec:
+      containers:
+        - name: upload-portal
+          image: gadiyadekho7/upload-portal:latest
+          ports:
+            - containerPort: 5000
+
+          # ── Environment variables from Secret ──────────────────────────
+          # Never hardcoded — all injected at runtime from K8s Secret
+          env:
+            - name: FLASK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: upload-portal-secret
+                  key: FLASK_SECRET_KEY
+
+            - name: PORTAL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: upload-portal-secret
+                  key: PORTAL_USERNAME
+
+            - name: PORTAL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: upload-portal-secret
+                  key: PORTAL_PASSWORD
+
+            - name: S3_BUCKET_MAIN
+              valueFrom:
+                secretKeyRef:
+                  name: upload-portal-secret
+                  key: S3_BUCKET_MAIN
+
+            - name: S3_BUCKET_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: upload-portal-secret
+                  key: S3_BUCKET_ADMIN
+
+            - name: CF_DIST_MAIN
+              valueFrom:
+                secretKeyRef:
+                  name: upload-portal-secret
+                  key: CF_DIST_MAIN
+
+            - name: CF_DIST_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: upload-portal-secret
+                  key: CF_DIST_ADMIN
+
+          # ── Resource limits ────────────────────────────────────────────
+          # Requests = guaranteed minimum
+          # Limits = hard maximum — container killed if exceeded
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+          # ── Liveness probe ─────────────────────────────────────────────
+          # K8s restarts pod if this fails 3 times
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+
+          # ── Readiness probe ────────────────────────────────────────────
+          # K8s only sends traffic when this passes
+          # Prevents requests hitting pod before Flask is ready
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
