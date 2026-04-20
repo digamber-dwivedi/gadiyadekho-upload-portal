@@ -22,3 +22,7 @@ Internal static site deployment portal for GaadiyaHub platform.
 
 ## Live at
 https://upload.gadiyadekhe.com (internal access only)
+
+
+<img width="959" height="476" alt="image" src="https://github.com/user-attachments/assets/48c223c0-6822-44b7-81ea-be77d317a926" />
+
